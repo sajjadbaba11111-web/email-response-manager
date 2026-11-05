@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Draft #{{ item.draft.id }} - Admin</title>
+  <style>
+    body { margin:0; font-family: system-ui, sans-serif; background:#0b1220; color:#e5eefb; }
+    main { max-width:1000px; margin:0 auto; padding:20px; }
+    a { color:#93c5fd; } .muted { color:#93a4bf; }
+    .card { background:#111827; border:1px solid #243244; border-radius:12px; padding:16px; margin:12px 0; }
+    h1,h2 { margin:0 0 10px; } h1{font-size:1.2rem} h2{font-size:1rem}
+    pre { white-space:pre-wrap; word-break:break-word; background:#020617; border:1px solid #243244; padding:12px; border-radius:8px; }
+    .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:.75rem; border:1px solid #243244; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="/admin/dashboard">← Back to dashboard</a></p>
+  <h1>Draft #{{ item.draft.id }} <span class="pill">{{ item.draft.status }}</span></h1>
+  <div class="card">
+    <h2>Draft / Response</h2>
+    <div class="muted">Email ID: <code>{{ item.draft.email_id }}</code> · Sender: {{ item.draft.sender }} · Created: {{ item.draft.created_at }} · Sent: {{ item.draft.sent_at or '—' }}</div>
+    <h3>Generated draft</h3>
+    <pre>{{ item.draft.draft_text }}</pre>
+    <h3>Final response (sent to email)</h3>
+    <pre>{{ item.draft.final_text or '(not sent / no override)' }}</pre>
+  </div>
+  <div class="card">
+    <h2>Corresponding Email</h2>
+    {% if item.email %}
+      <div class="muted">From: {{ item.email.sender }} · Subject: {{ item.email.subject or '' }} · Date: {{ item.email.email_date }}</div>
+      <pre>{{ item.email.body or '' }}</pre>
+    {% else %}
+      <p class="muted">No email snapshot stored for this draft yet.</p>
+    {% endif %}
+  </div>
+</main>
+</body>
+</html>

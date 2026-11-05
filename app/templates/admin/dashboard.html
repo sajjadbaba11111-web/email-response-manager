@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin Dashboard - Email WhatsApp Agent</title>
+  <style>
+    :root { --bg:#0b1220; --panel:#111827; --line:#243244; --text:#e5eefb; --muted:#93a4bf; --ok:#166534; --warn:#92400e; --bad:#991b1b; --accent:#2563eb; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, sans-serif; background:linear-gradient(180deg,#08101d,#0b1220); color:var(--text); }
+    header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:16px 20px; border-bottom:1px solid var(--line); position:sticky; top:0; background:rgba(11,18,32,.92); backdrop-filter: blur(6px); }
+    h1 { margin:0; font-size:1.15rem; }
+    .muted { color:var(--muted); font-size:.9rem; }
+    main { padding:18px 20px 40px; max-width:1400px; margin:0 auto; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:18px; }
+    .stat { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; }
+    .stat .k { color:var(--muted); font-size:.8rem; } .stat .v { font-size:1.6rem; font-weight:700; margin-top:4px; }
+    .section { background:var(--panel); border:1px solid var(--line); border-radius:12px; margin-top:14px; overflow:hidden; }
+    .section h2 { margin:0; padding:14px 16px; font-size:1rem; border-bottom:1px solid var(--line); }
+    .wrap { overflow:auto; }
+    table { width:100%; border-collapse:collapse; font-size:.9rem; }
+    th, td { padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; text-align:left; }
+    th { color:var(--muted); font-weight:600; white-space:nowrap; }
+    tr:hover td { background:rgba(255,255,255,.02); }
+    .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:.75rem; font-weight:600; border:1px solid var(--line); }
+    .sent { background:rgba(22,101,52,.25); } .pending { background:rgba(146,64,14,.25); } .discarded,.failed { background:rgba(153,27,27,.2); }
+    a { color:#93c5fd; text-decoration:none; } a:hover { text-decoration:underline; }
+    pre { white-space:pre-wrap; word-break:break-word; margin:0; font:inherit; color:var(--muted); max-width:520px; }
+    button.link { background:transparent; color:#93c5fd; border:1px solid var(--line); padding:6px 10px; border-radius:8px; cursor:pointer; }
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Email ↔ WhatsApp Response Management</h1>
+    <div class="muted">Admin activity dashboard · DB: {{ db_backend }}</div>
+  </div>
+  <form method="post" action="/admin/logout"><button class="link" type="submit">Logout</button></form>
+</header>
+<main>
+  <div class="grid">
+    <div class="stat"><div class="k">Email snapshots</div><div class="v">{{ stats.email_snapshots }}</div></div>
+    <div class="stat"><div class="k">Pending drafts</div><div class="v">{{ stats.pending_drafts }}</div></div>
+    <div class="stat"><div class="k">Sent responses</div><div class="v">{{ stats.sent_drafts }}</div></div>
+    <div class="stat"><div class="k">Discarded</div><div class="v">{{ stats.discarded_drafts }}</div></div>
+    <div class="stat"><div class="k">Activities</div><div class="v">{{ stats.activities }}</div></div>
+    <div class="stat"><div class="k">Seen emails</div><div class="v">{{ stats.seen_emails }}</div></div>
+  </div>
+
+  <section class="section">
+    <h2>Recent Activities (responses, commands, system events)</h2>
+    <div class="wrap"><table>
+      <thead><tr><th>Time</th><th>Kind</th><th>Actor</th><th>Email</th><th>Draft</th><th>Summary</th><th>Detail</th></tr></thead>
+      <tbody>
+      {% for a in activities %}
+        <tr>
+          <td class="muted">{{ a.created_at }}</td>
+          <td><span class="pill">{{ a.kind }}</span></td>
+          <td>{{ a.actor or '' }}</td>
+          <td>{% if a.email_id %}<code>{{ a.email_id[:18] }}…</code>{% endif %}</td>
+          <td>{% if a.draft_id %}<a href="/admin/draft/{{ a.draft_id }}">#{{ a.draft_id }}</a>{% endif %}</td>
+          <td>{{ a.summary }}</td>
+          <td><pre>{{ a.detail if a.detail is not none else '' }}</pre></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="muted">No activity yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="section">
+    <h2>Drafts & Responses (linked to emails)</h2>
+    <div class="wrap"><table>
+      <thead><tr><th>ID</th><th>Status</th><th>Sender / Subject</th><th>Draft</th><th>Final Response (sent)</th><th>Created</th><th>Sent</th></tr></thead>
+      <tbody>
+      {% for d in drafts %}
+        <tr>
+          <td><a href="/admin/draft/{{ d.id }}">#{{ d.id }}</a></td>
+          <td><span class="pill {{ d.status }}">{{ d.status }}</span></td>
+          <td><div>{{ d.sender }}</div><div class="muted">{{ d.subject or '(no subject)' }}</div><div class="muted"><code>{{ d.email_id }}</code></div></td>
+          <td><pre>{{ d.draft_text }}</pre></td>
+          <td><pre>{{ d.final_text or '' }}</pre></td>
+          <td class="muted">{{ d.created_at }}</td>
+          <td class="muted">{{ d.sent_at or '' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="muted">No drafts.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="section">
+    <h2>Email Snapshots</h2>
+    <div class="wrap"><table>
+      <thead><tr><th>Email ID</th><th>From</th><th>Subject</th><th>Date</th><th>Body (truncated)</th></tr></thead>
+      <tbody>
+      {% for e in emails %}
+        <tr>
+          <td><code>{{ e.email_id }}</code></td>
+          <td>{{ e.sender or '' }}</td>
+          <td>{{ e.subject or '' }}</td>
+          <td class="muted">{{ e.email_date }}</td>
+          <td><pre>{{ (e.body or '')[:600] }}</pre></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="muted">No email snapshots.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+  </section>
+</main>
+</body>
+</html>

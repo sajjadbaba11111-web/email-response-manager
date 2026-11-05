@@ -1,0 +1,113 @@
+# ---------------------------------------------------------------------------
+# Runtime dependencies (pinned).
+#
+#   pip install -r requirements.txt
+#
+# The transitive dependencies are pinned as well so that a fresh install is
+# reproducible.  Update them with:
+#
+#   pip install -U -r requirements.txt
+# ---------------------------------------------------------------------------
+
+# --- Web framework ----------------------------------------------------------
+fastapi==0.158.1
+uvicorn[standard]==0.54.0
+starlette==1.9.0
+anyio==4.15.1
+sniffio==1.3.1
+idna==3.20
+typing_extensions==4.16.0
+typing-inspection==0.4.4
+annotated-types==0.8.0
+annotated-doc==0.0.5
+
+# --- MCP --------------------------------------------------------------------
+mcp==2.3.0
+mcp-types==2.3.0
+httpx2==2.16.0
+httpcore2==2.16.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+referencing==0.37.0
+rpds-py==2026.9.1
+attrs==26.1.0
+python-multipart==0.0.32
+sse-starlette==3.5.0
+PyJWT==2.15.1
+cryptography==50.0.2
+cffi==2.1.1
+pycparser==3.11
+opentelemetry-api==1.45.1
+
+# --- Claude ------------------------------------------------------------------
+anthropic==2.0.0
+httpx==0.28.1
+httpcore==1.0.9
+h11==0.16.0
+certifi==2026.10.19
+jiter==0.17.0
+docstring_parser==0.18.0
+
+# --- Gmail -------------------------------------------------------------------
+google-api-python-client==2.201.0
+google-api-core==2.42.0
+google-auth==2.62.0
+google-auth-httplib2==0.4.4
+google-auth-oauthlib==1.5.0
+googleapis-common-protos==1.75.5
+proto-plus==1.29.0
+protobuf==7.36.2
+uritemplate==4.2.0
+requests==2.34.2
+requests-oauthlib==2.0.0
+oauthlib==4.0.0
+pyasn1==0.6.4
+pyasn1_modules==0.4.2
+urllib3==2.8.0
+httplib2==0.32.0
+charset-normalizer==3.5.2
+pyparsing==3.3.3
+truststore==0.10.5
+
+# --- Scheduling ---------------------------------------------------------------
+APScheduler==3.11.3
+tzlocal==5.4.4
+tzdata==2026.5
+
+# --- Database (PostgreSQL primary; SQLite fallback when DATABASE_URL is empty) ---
+psycopg==3.3.8
+psycopg-binary==3.3.8
+psycopg-pool==3.3.3
+
+# --- Admin UI -----------------------------------------------------------------
+jinja2==3.1.6
+MarkupSafe==3.0.4
+itsdangerous==2.2.0
+
+# --- Configuration --------------------------------------------------------------
+pydantic==2.14.1
+pydantic-settings==2.16.1
+pydantic_core==2.50.1
+python-dotenv==1.2.4
+
+# --- Server extras ---------------------------------------------------------------
+click==8.5.0
+httptools==0.9.0
+PyYAML==6.0.3
+watchfiles==1.3.0
+websockets==17.3
+uvloop==0.23.0; sys_platform != "win32"
+colorama==0.4.6; sys_platform == "win32"
+pywin32==312; sys_platform == "win32"
+
+# ---------------------------------------------------------------------------
+# Development and test dependencies
+# ---------------------------------------------------------------------------
+pytest==9.1.1
+pytest-asyncio==1.4.0
+respx==0.23.1
+ruff==0.17.1
+iniconfig==2.3.1
+packaging==26.3
+pluggy==1.7.0
+Pygments==2.21.0

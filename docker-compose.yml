@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: email-whatsapp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-email_agent}
+      POSTGRES_USER: ${POSTGRES_USER:-email_agent}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-email_agent} -d ${POSTGRES_DB:-email_agent}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: email-whatsapp-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Use PostgreSQL in Docker by default (override in .env if needed).
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-email_agent}:${POSTGRES_PASSWORD:-change-me-postgres}@postgres:5432/${POSTGRES_DB:-email_agent}}
+      DB_PATH: /srv/app/data/agent.db
+      GMAIL_TOKEN_PATH: /srv/app/data/token.json
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - appdata:/srv/app/data
+      # Mount OAuth files if you have them locally (optional):
+      # - ./token.json:/srv/app/data/token.json
+      # - ./client_secrets.json:/srv/app/client_secrets.json:ro
+
+volumes:
+  pgdata:
+    name: email_whatsapp_pgdata
+  appdata:
+    name: email_whatsapp_appdata
